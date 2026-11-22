@@ -28,8 +28,8 @@ def health(svc: Svc) -> HealthResponse:
     return HealthResponse(
         status="ok",
         ai_enabled=svc.ai is not None,
-        tts="gemini" if svc.speech is not None else "browser",
-        model=svc.settings.gemini_model if svc.ai is not None else None,
+        tts="gemini" if svc.speech is not None and svc.speech.available else "browser",
+        model=svc.ai.active_model if svc.ai is not None else None,
         documents=len(svc.db.list_documents()),
     )
 

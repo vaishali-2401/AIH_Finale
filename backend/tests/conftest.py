@@ -112,6 +112,7 @@ class FakeAI:
     """
 
     embedding_model = "fake-embedding"
+    active_model = "fake-model"
 
     def __init__(self, fail: bool = False):
         self.fail = fail
@@ -164,8 +165,9 @@ class FakeAI:
 
 
 class FakeSpeech:
-    def __init__(self, fail: bool = False):
+    def __init__(self, fail: bool = False, available: bool = True):
         self.fail = fail
+        self.available = available
 
     def synthesize_dialogue(self, lines, voices) -> bytes:
         if self.fail:

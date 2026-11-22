@@ -140,3 +140,11 @@ def test_podcast_audio_rejects_bad_ids(make_client):
     client = make_client()
     assert client.get("/api/podcast/audio/../../app.db").status_code == 404
     assert client.get("/api/podcast/audio/" + "0" * 32).status_code == 404
+
+
+def test_podcast_skips_unavailable_speech(make_client, sample_pdfs):
+    client = _library(make_client, sample_pdfs, ai=FakeAI(), speech=FakeSpeech(available=False))
+    assert client.get("/api/health").json()["tts"] == "browser"
+    body = client.post("/api/podcast", json={"text": SELECTION}).json()
+    assert body["tts"] == "browser"
+    assert body["tts_error"] is None  # not attempted, so no error to report

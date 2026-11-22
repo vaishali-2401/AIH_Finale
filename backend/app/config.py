@@ -22,7 +22,11 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = Field(
         default=None, validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY")
     )
-    gemini_model: str = "gemini-2.5-flash"
+    # Text model, tried first. When it is retired, overloaded or rate limited,
+    # the comma-separated fallbacks are tried in order.
+    gemini_model: str = "gemini-3.5-flash-lite"
+    gemini_fallback_models: str = "gemini-3.6-flash,gemini-3.5-flash,gemini-3.8-flash"
+    ai_timeout_seconds: int = 25
     embedding_model: str = "gemini-embedding-001"
     embedding_dim: int = 768
 
@@ -30,6 +34,7 @@ class Settings(BaseSettings):
     tts_enabled: bool = True
     tts_api_key: str | None = None
     tts_model: str = "gemini-2.5-flash-preview-tts"
+    tts_fallback_models: str = "gemini-3.1-flash-tts-preview,gemini-3.8-flash-lite-tts"
     tts_voice_host: str = "Kore"
     tts_voice_guest: str = "Puck"
 
@@ -58,6 +63,14 @@ class Settings(BaseSettings):
         if not self.tts_enabled:
             return None
         return self.tts_api_key or self.gemini_api_key
+
+    @property
+    def fallback_model_list(self) -> list[str]:
+        return [m.strip() for m in self.gemini_fallback_models.split(",") if m.strip()]
+
+    @property
+    def tts_fallback_model_list(self) -> list[str]:
+        return [m.strip() for m in self.tts_fallback_models.split(",") if m.strip()]
 
     @property
     def cors_origin_list(self) -> list[str]:

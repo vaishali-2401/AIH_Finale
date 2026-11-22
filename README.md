@@ -90,11 +90,14 @@ All settings are environment variables (or `backend/.env`). All of them are opti
 | Variable | Default | Purpose |
 |---|---|---|
 | `GEMINI_API_KEY` | *(empty)* | Enables semantic search, AI ranking, insights and the AI-written podcast. `GOOGLE_API_KEY` is accepted too. |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Model for ranking, insights and podcast scripts. |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Model for ranking, insights and podcast scripts. |
+| `GEMINI_FALLBACK_MODELS` | `gemini-3.6-flash,gemini-3.5-flash,gemini-3.8-flash` | Tried in order when a model is retired (404), overloaded (5xx), rate limited (429) or times out. |
+| `AI_TIMEOUT_SECONDS` | `25` | Per-request timeout before moving to the next model. |
 | `EMBEDDING_MODEL` | `gemini-embedding-001` | Embedding model. Changing it re-indexes documents on the next start. |
 | `TTS_ENABLED` | `true` | Set `false` to always use browser speech. |
 | `TTS_API_KEY` | *(uses `GEMINI_API_KEY`)* | Separate key for Gemini text-to-speech. |
-| `TTS_MODEL` | `gemini-2.5-flash-preview-tts` | Multi-speaker TTS model. |
+| `TTS_MODEL` | `gemini-2.5-flash-preview-tts` | Multi-speaker TTS model (uses the `v1beta` API). |
+| `TTS_FALLBACK_MODELS` | `gemini-3.1-flash-tts-preview,gemini-3.8-flash-lite-tts` | Voice models tried when the first is unavailable. |
 | `DATA_DIR` | `backend/data` (`/data` in Docker) | SQLite database, uploaded PDFs, generated audio. |
 | `HOST` / `PORT` | `127.0.0.1` / `8000` (`0.0.0.0` / `8080` in Docker) | Server address. |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins allowed to call the API. |
@@ -222,6 +225,7 @@ Two rules for contributors:
 | Header shows **Offline** | The backend isn't running or isn't at `NEXT_PUBLIC_API_URL`. Start it with `python -m app` in `backend/`. |
 | Header shows **Keyword mode** although you set a key | Restart the backend after editing `.env`. Check that the variable is `GEMINI_API_KEY`. |
 | Documents show *Semantic indexing failed, keyword search only* | The key is invalid or out of quota. Fix the key and restart: keyword-only documents are re-indexed automatically. |
+| Log says *model … is no longer available to new users* or *high demand* | The app falls back to the next model in `GEMINI_FALLBACK_MODELS` automatically. If every model fails, set `GEMINI_MODEL` to a current one from [the model list](https://ai.google.dev/gemini-api/docs/models). |
 | *PDF contains no extractable text* | The PDF is a scanned image. Run it through OCR first (e.g. `ocrmypdf`). |
 | Podcast plays with a robotic voice | That's the browser fallback. Gemini TTS is unavailable; the tab says why. |
 | `npm install` / `npm run dev` fails on PDF.js | Use Node.js 22.13 or newer. |

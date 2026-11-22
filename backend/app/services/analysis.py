@@ -193,7 +193,7 @@ def generate_podcast(
     response = PodcastResponse(
         title=script.title, lines=script.lines, generated_by=generated_by, tts="browser"
     )
-    if speech is None:
+    if speech is None or not speech.available:
         return response
     try:
         wav = speech.synthesize_dialogue(

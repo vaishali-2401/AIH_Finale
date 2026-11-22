@@ -34,7 +34,7 @@ class Indexer:
         self._uploads_dir = uploads_dir
         self._executor: ThreadPoolExecutor | None = None
         if runner is None:
-            self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="indexer")
+            self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="indexer")
             runner = self._executor.submit  # type: ignore[assignment]
         self._run = runner
 
