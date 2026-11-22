@@ -33,7 +33,7 @@ export default function Tabs<T extends string>({ tabs, value, onChange, idPrefix
   };
 
   return (
-    <div role="tablist" className={cn("flex gap-1 rounded-lg bg-surface-2 p-1", className)}>
+    <div role="tablist" className={cn("flex gap-5 border-b border-line", className)}>
       {tabs.map((tab, index) => {
         const selected = tab.id === value;
         return (
@@ -51,8 +51,8 @@ export default function Tabs<T extends string>({ tabs, value, onChange, idPrefix
             onClick={() => onChange(tab.id)}
             onKeyDown={(e) => onKeyDown(e, index)}
             className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors",
-              selected ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink",
+              "-mb-px flex items-center gap-1.5 border-b-2 pt-1 pb-2 text-[13px] transition-colors",
+              selected ? "border-ink font-semibold text-ink" : "border-transparent text-ink-3 hover:text-ink",
             )}
           >
             {tab.icon}

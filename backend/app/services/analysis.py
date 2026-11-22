@@ -28,6 +28,7 @@ from app.schemas import (
 )
 from app.services.ai import AIClient, AIError, SpeechClient
 from app.services.search import Candidate, SearchIndex
+from app.services.snippets import focus
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ def find_connections(
         try:
             ranked = _rerank(ai, req, candidates, titles)
             connections = [
-                _to_connection(candidates[r.index - 1], titles, r.relation, r.reason, r.relevance)
+                _to_connection(candidates[r.index - 1], req.text, titles, r.relation, r.reason, r.relevance)
                 for r in ranked
                 if r.relevance >= settings.min_relevance
             ][: settings.max_connections]
@@ -84,7 +85,8 @@ def find_connections(
             warning = "AI ranking is unavailable right now; showing closest matches."
 
     connections = [
-        _to_connection(c, titles, "related", None, c.score) for c in candidates[: settings.max_connections]
+        _to_connection(c, req.text, titles, "related", None, c.score)
+        for c in candidates[: settings.max_connections]
     ]
     return ConnectionsResponse(mode=mode, reranked=False, connections=connections, warning=warning)
 
@@ -108,7 +110,9 @@ selected text, return an item with:
   figure or recommendation), "example" (a concrete instance or illustration of it) or
   "related" (useful background on the same topic)
 - relevance: 0 to 1
-- reason: one specific sentence (max 25 words) saying how it connects
+- reason: one specific sentence (max 25 words) saying how it connects. Describe the
+  content itself (e.g. "Chez Pipo is a Nice restaurant known for socca"); never refer to
+  candidate numbers or call it "the passage" or "the candidate".
 Leave out candidates that are off-topic or merely repeat the selected text.
 Order items from most to least relevant."""
     result = ai.generate_json(prompt, RerankResult, system=SYSTEM_PROMPT)
@@ -123,17 +127,24 @@ Order items from most to least relevant."""
 
 
 def _to_connection(
-    candidate: Candidate, titles: dict[str, str], relation, reason: str | None, score: float
+    candidate: Candidate,
+    query: str,
+    titles: dict[str, str],
+    relation,
+    reason: str | None,
+    score: float,
 ) -> Connection:
     chunk = candidate.chunk
+    focused = focus(chunk.text, chunk.rects, query, SNIPPET_CHARS)
     return Connection(
         chunk_id=chunk.id,
         document_id=chunk.document_id,
         document_title=titles.get(chunk.document_id, "Untitled document"),
-        page=chunk.page,
+        # Jump to where the matching part is, which may be a later page of the chunk.
+        page=focused.rects[0]["page"] if focused.rects else chunk.page,
         section=chunk.section,
-        snippet=_truncate(chunk.text, SNIPPET_CHARS),
-        rects=[Rect(**r) for r in chunk.rects],
+        snippet=focused.snippet,
+        rects=[Rect(**r) for r in focused.rects],
         relation=relation,
         reason=reason,
         score=round(min(max(score, 0.0), 1.0), 3),

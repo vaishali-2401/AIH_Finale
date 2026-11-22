@@ -6,15 +6,15 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:bg-accent-hover dark:text-canvas shadow-sm",
-  secondary: "bg-surface text-ink border border-line hover:bg-surface-2 hover:border-line-strong shadow-sm",
-  ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
-  danger: "text-danger hover:bg-danger-soft",
+  primary: "bg-accent text-on-accent border border-accent hover:bg-accent-hover",
+  secondary: "bg-surface text-ink border border-line-strong hover:bg-surface-2",
+  ghost: "text-ink-2 border border-transparent hover:text-ink hover:underline underline-offset-4",
+  danger: "text-danger border border-transparent hover:underline underline-offset-4",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-2.5 text-[13px] gap-1.5 rounded-md",
-  md: "h-9 px-3.5 text-sm gap-2 rounded-lg",
+  sm: "h-8 px-2.5 text-[13px] gap-1.5",
+  md: "h-9 px-3.5 text-sm gap-2",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

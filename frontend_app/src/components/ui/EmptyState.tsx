@@ -11,12 +11,12 @@ interface EmptyStateProps {
 
 export default function EmptyState({ icon, title, children, action, className }: EmptyStateProps) {
   return (
-    <div className={cn("flex flex-col items-center px-6 py-10 text-center", className)}>
-      <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-surface-2 text-ink-3 [&>svg]:size-5">
+    <div className={cn("flex flex-col items-start px-5 py-8", className)}>
+      <div className="mb-3 text-ink-3 [&>svg]:size-4" aria-hidden>
         {icon}
       </div>
-      <p className="text-sm font-medium text-ink">{title}</p>
-      {children && <div className="mt-1 max-w-xs text-[13px] leading-relaxed text-ink-2">{children}</div>}
+      <p className="font-serif text-[17px] leading-snug text-ink">{title}</p>
+      {children && <div className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-ink-2">{children}</div>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
@@ -36,8 +36,8 @@ export function Notice({
     <div
       role={tone === "error" ? "alert" : "note"}
       className={cn(
-        "rounded-lg px-3 py-2.5 text-[13px] leading-snug",
-        tone === "error" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning",
+        "border-l-2 py-1 pl-3 text-[13px] leading-snug",
+        tone === "error" ? "border-danger text-danger" : "border-ink text-ink-2",
       )}
     >
       {children}

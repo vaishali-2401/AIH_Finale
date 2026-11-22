@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             role={toast.tone === "error" ? "alert" : "status"}
-            className="pointer-events-auto flex w-full max-w-md animate-slide-up items-start gap-2.5 rounded-lg border border-line bg-surface px-3.5 py-3 text-sm text-ink shadow-lg"
+            className="pointer-events-auto flex w-full max-w-md animate-fade-in items-start gap-2.5 border border-line-strong bg-surface px-3.5 py-3 text-sm text-ink shadow-lg"
           >
             <ToneIcon tone={toast.tone} />
             <p className="flex-1 leading-snug">{toast.message}</p>
@@ -70,7 +70,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 function ToneIcon({ tone }: { tone: Tone }) {
   const className = cn(
     "mt-0.5 size-4 shrink-0",
-    tone === "error" ? "text-danger" : tone === "success" ? "text-success" : "text-accent",
+    tone === "error" ? "text-danger" : "text-ink",
   );
   if (tone === "error") return <CircleAlert className={className} />;
   if (tone === "success") return <CircleCheck className={className} />;

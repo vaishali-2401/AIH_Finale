@@ -1,6 +1,6 @@
 "use client";
 
-import { FilePlus2, Network, Sparkles, Upload, WifiOff } from "lucide-react";
+import { Upload, WifiOff } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnalysisPanel from "@/components/analysis/AnalysisPanel";
@@ -221,7 +221,7 @@ function WorkspaceInner() {
           <button
             type="button"
             aria-label="Close panel"
-            className="absolute inset-0 z-20 animate-fade-in bg-black/30 xl:hidden"
+            className="absolute inset-0 z-20 animate-fade-in bg-canvas/70 xl:hidden"
             onClick={() => {
               setLibraryOpen(false);
               setAnalysisOpen(false);
@@ -233,7 +233,7 @@ function WorkspaceInner() {
           aria-label="Library"
           className={cn(
             "z-30 w-72 shrink-0 border-r border-line bg-surface transition-transform",
-            "max-lg:absolute max-lg:inset-y-0 max-lg:left-0 max-lg:shadow-xl",
+            "max-lg:absolute max-lg:inset-y-0 max-lg:left-0 max-lg:border-r-ink",
             libraryOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
           )}
         >
@@ -295,7 +295,7 @@ function WorkspaceInner() {
           aria-label="Connections"
           className={cn(
             "z-30 flex w-95 shrink-0 flex-col border-l border-line bg-surface transition-transform",
-            "max-xl:absolute max-xl:inset-y-0 max-xl:right-0 max-xl:max-w-[92vw] max-xl:shadow-xl",
+            "max-xl:absolute max-xl:inset-y-0 max-xl:right-0 max-xl:max-w-[92vw] max-xl:border-l-ink",
             analysisOpen ? "max-xl:translate-x-0" : "max-xl:translate-x-full",
           )}
         >
@@ -310,10 +310,11 @@ function WorkspaceInner() {
       </div>
 
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-accent/10 p-6 backdrop-blur-[2px]">
-          <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-accent bg-surface px-12 py-10 shadow-xl">
-            <Upload className="size-8 text-accent" />
-            <p className="text-base font-semibold text-ink">Drop PDFs to add them to your library</p>
+        <div className="pointer-events-none fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-canvas/85 p-6">
+          <div className="flex flex-col items-start gap-2 border-2 border-dashed border-ink bg-surface px-12 py-10">
+            <Upload className="size-6 text-ink" />
+            <p className="font-serif text-2xl text-ink">Drop to add to your library.</p>
+            <p className="font-mono text-[11px] text-ink-3">PDF only · up to 30 files</p>
           </div>
         </div>
       )}
@@ -334,37 +335,38 @@ function Welcome({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const steps = [
-    { icon: FilePlus2, title: "Add your PDFs", text: "Reports, papers, guides: anything on related topics." },
-    { icon: Sparkles, title: "Select a passage", text: "Highlight text while you read and ask for connections." },
-    { icon: Network, title: "See how it connects", text: "Supporting points, contradictions and examples across documents." },
+    { title: "Add your PDFs", text: "Reports, papers, guides: anything on related topics." },
+    { title: "Select a passage", text: "Highlight text while you read and ask for connections." },
+    { title: "See how it connects", text: "Where your other documents agree, disagree or give an example." },
   ];
 
   return (
-    <div className="scroll-thin flex flex-1 items-center justify-center overflow-y-auto bg-canvas p-6">
-      <div className="w-full max-w-2xl text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+    <div className="scroll-thin flex flex-1 overflow-y-auto bg-canvas px-6 py-10 sm:px-12 sm:py-16">
+      <div className="mx-auto w-full max-w-2xl">
+        <p className="label text-ink-3">A reading tool</p>
+        <h1 className="mt-3 max-w-xl font-serif text-[40px] leading-[1.05] tracking-tight text-ink sm:text-[52px]">
           Connect ideas across your PDFs
         </h1>
-        <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-ink-2">
-          Read any document and instantly find where the rest of your library agrees, disagrees or adds
-          detail.
+        <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-2">
+          Read any document and find where the rest of your library agrees with it, disagrees with it, or
+          adds detail.
         </p>
 
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="group mt-8 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-line-strong bg-surface px-6 py-10 transition-colors hover:border-accent hover:bg-accent-soft disabled:opacity-60"
+          className="group mt-10 flex w-full items-center justify-between gap-4 border border-dashed border-ink bg-surface px-5 py-6 text-left transition-colors hover:bg-surface-2 disabled:opacity-60"
         >
-          {uploading ? (
-            <Spinner className="size-7 text-accent" />
-          ) : (
-            <Upload className="size-7 text-ink-3 transition-colors group-hover:text-accent" />
-          )}
-          <span className="text-sm font-medium text-ink">
-            {uploading ? "Uploading…" : "Drop PDFs here or click to browse"}
+          <span>
+            <span className="block text-[15px] font-semibold text-ink">
+              {uploading ? "Uploading…" : "Drop PDFs here, or click to choose files"}
+            </span>
+            <span className="mt-1 block font-mono text-[11px] text-ink-3">
+              Up to 30 files at a time · 50 MB each
+            </span>
           </span>
-          <span className="text-[12.5px] text-ink-3">Up to 30 files at a time, 50 MB each</span>
+          {uploading ? <Spinner className="size-5 text-ink" /> : <Upload className="size-5 text-ink" />}
         </button>
         <input
           ref={inputRef}
@@ -379,26 +381,24 @@ function Welcome({
           }}
         />
         {hasDocuments && (
-          <p className="mt-4 text-[13px] text-ink-2">
-            or{" "}
-            <button type="button" onClick={onBrowse} className="font-medium text-accent hover:underline lg:hidden">
+          <p className="mt-3 text-[13px] text-ink-2">
+            Or{" "}
+            <button type="button" onClick={onBrowse} className="text-ink underline underline-offset-2 lg:hidden">
               open a document from your library
             </button>
-            <span className="max-lg:hidden">open a document from your library on the left</span>
+            <span className="max-lg:hidden">open a document from your library on the left.</span>
           </p>
         )}
 
-        <ol className="mt-10 grid gap-4 text-left sm:grid-cols-3">
-          {steps.map(({ icon: Icon, title, text }, i) => (
-            <li key={title} className="rounded-xl border border-line bg-surface p-4">
-              <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent-ink">
-                  {i + 1}
-                </span>
-                <Icon className="size-4 text-ink-3" aria-hidden />
-              </div>
-              <p className="mt-3 text-[13.5px] font-medium text-ink">{title}</p>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-ink-2">{text}</p>
+        <ol className="mt-14 grid border-t border-ink sm:grid-cols-3">
+          {steps.map(({ title, text }, i) => (
+            <li
+              key={title}
+              className="border-b border-line py-5 sm:border-b-0 sm:border-l sm:px-5 sm:first:border-l-0 sm:first:pl-0"
+            >
+              <span className="font-mono text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+              <p className="mt-2 font-serif text-[17px] leading-snug text-ink">{title}</p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-ink-2">{text}</p>
             </li>
           ))}
         </ol>

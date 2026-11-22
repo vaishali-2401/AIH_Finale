@@ -20,8 +20,8 @@ export default function ConnectionsTab({ state, activeChunkId, onOpen, onRetry }
     return (
       <div className="space-y-3" aria-busy="true" aria-label="Finding connections">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="space-y-2.5 rounded-xl border border-line bg-surface p-3.5">
-            <Skeleton className="h-4 w-24 rounded-full" />
+          <div key={i} className="space-y-2.5 border-b border-line py-4 pl-4">
+            <Skeleton className="h-4 w-20" />
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-5/6" />
             <Skeleton className="h-2.5 w-1/2" />
@@ -52,11 +52,11 @@ export default function ConnectionsTab({ state, activeChunkId, onOpen, onRetry }
       {warning && <Notice tone="warning">{warning}</Notice>}
       {connections.length ? (
         <>
-          <p className="text-[12px] text-ink-3">
+          <p className="label text-ink-3">
             {connections.length} {connections.length === 1 ? "passage" : "passages"} ·{" "}
             {reranked ? "ranked by AI" : mode === "semantic" ? "semantic matches" : "keyword matches"}
           </p>
-          <ul className="space-y-2.5">
+          <ul className="-mx-4 border-t border-line">
             {connections.map((c) => (
               <ConnectionCard
                 key={c.chunk_id}

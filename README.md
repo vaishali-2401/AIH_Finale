@@ -36,7 +36,8 @@ maintain. See [What changed in v2](#what-changed-in-v2).
 | **Insights** | Summary, key takeaways, contradictions, examples and "did you know" facts, grounded only in your documents. |
 | **Podcast** | A short two-host episode about the passage. It's voiced by Gemini when available, and otherwise read aloud by the browser. |
 | **Works without AI** | With no API key the app still runs: keyword-based connections, a scripted podcast and browser voices. |
-| **Polish** | Light/dark theme, responsive layout (drawers on small screens), keyboard-accessible tabs, clear loading, empty and error states. |
+| **Design** | A quiet black-and-white reading interface: serif type for reading, ruled lists, square corners, and a single highlighter yellow for marked passages. Light/dark themes, responsive layout (drawers on small screens), keyboard-accessible tabs, clear loading, empty and error states. |
+| **Precise results** | Each result shows and highlights the sentence that matches your selection, not the whole section around it. |
 
 <table>
   <tr>
@@ -245,7 +246,7 @@ images. v2 is a rebuild:
   are pinned. There's a full pytest suite.
 - **Frontend:** PDF.js replaces Adobe PDF Embed, with real text selection and
   highlights. Connections open the correct document. The podcast actually plays.
-  The three-panel UI has light and dark themes and works on mobile.
+  The three-panel UI has a monochrome editorial design, light and dark themes, and works on mobile.
 - **Operations:** a working multi-stage Docker image on one port, Compose, and
   CI with unit, end-to-end and container tests.
 - **Security:** an API key that had been committed was removed (it is no

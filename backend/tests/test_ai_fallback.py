@@ -129,7 +129,7 @@ def test_document_embedding_retries_rate_limits():
     vectors = ai.embed(["a", "b"])
     assert vectors.shape == (2, 2)
     assert models.calls == 3
-    assert sleeps == [5, 10]
+    assert sleeps == [10, 30]
 
 
 def test_query_embedding_fails_fast():
@@ -143,7 +143,7 @@ def test_embedding_gives_up_after_retries():
     ai, _, sleeps = make_embedder([FakeAPIError(429)] * 4)
     with pytest.raises(AIError, match="429"):
         ai.embed(["a"])
-    assert sleeps == [5, 10, 20]
+    assert sleeps == [10, 30, 60]
 
 
 # -- speech: fallback across TTS models -----------------------------------------

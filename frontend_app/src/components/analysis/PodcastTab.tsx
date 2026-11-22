@@ -20,12 +20,9 @@ interface PodcastTabProps {
 export default function PodcastTab({ state, connectionsReady, onGenerate }: PodcastTabProps) {
   if (state.status === "idle") {
     return (
-      <div className="rounded-xl border border-dashed border-line-strong p-5 text-center">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-accent-soft text-accent">
-          <Headphones className="size-5" />
-        </div>
-        <p className="text-sm font-medium text-ink">Listen to the connections</p>
-        <p className="mx-auto mt-1 max-w-xs text-[13px] leading-relaxed text-ink-2">
+      <div className="py-2">
+        <p className="font-serif text-[17px] leading-snug text-ink">Listen instead of reading.</p>
+        <p className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-ink-2">
           A short two-host conversation about this passage and what your other documents say about it.
         </p>
         <Button
@@ -43,8 +40,8 @@ export default function PodcastTab({ state, connectionsReady, onGenerate }: Podc
 
   if (state.status === "loading") {
     return (
-      <div className="flex flex-col items-center gap-3 py-10 text-[13px] text-ink-2" aria-busy="true">
-        <Spinner className="size-5 text-accent" />
+      <div className="flex items-start gap-3 py-6 text-[13px] leading-relaxed text-ink-2" aria-busy="true">
+        <Spinner className="mt-0.5 size-4 shrink-0 text-ink" />
         Writing and recording your episode… this can take up to a minute.
       </div>
     );
@@ -106,12 +103,12 @@ function PodcastPlayer({ podcast, onRegenerate }: { podcast: Podcast; onRegenera
   };
 
   return (
-    <div className="animate-fade-in space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
+    <div className="animate-fade-in space-y-5">
+      <div className="border-b border-ink pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-wider text-ink-3 uppercase">Episode</p>
-            <h3 className="mt-0.5 text-[15px] leading-snug font-semibold text-ink">{podcast.title}</h3>
+            <p className="label text-ink-3">Episode</p>
+            <h3 className="mt-1 font-serif text-[19px] leading-snug text-ink">{podcast.title}</h3>
           </div>
           <Button size="sm" variant="ghost" icon={<RotateCw className="size-3.5" />} onClick={onRegenerate}>
             New take
@@ -144,35 +141,36 @@ function PodcastPlayer({ podcast, onRegenerate }: { podcast: Podcast; onRegenera
           )}
         </div>
 
-        <p className="mt-2.5 text-[11.5px] text-ink-3">
+        <p className="mt-3 font-mono text-[11px] leading-relaxed text-ink-3">
           {useBrowser ? "Read by your browser's built-in voice" : "Voiced by Gemini"} ·{" "}
           {podcast.generated_by === "ai" ? "script written by Gemini" : "simple script (AI unavailable)"}
         </p>
         {podcast.tts_error && (
-          <p className="mt-1 text-[11.5px] text-warning" title={podcast.tts_error}>
+          <p className="mt-1 font-mono text-[11px] text-ink-2" title={podcast.tts_error}>
             Gemini voices were unavailable, so your browser is reading it instead.
           </p>
         )}
       </div>
 
-      <ol className="space-y-2.5" aria-label="Transcript">
+      {/* Set like a script: speaker in the margin, line beside it. */}
+      <ol className="space-y-3" aria-label="Transcript">
         {podcast.lines.map((line, i) => (
           <li
             key={i}
             className={cn(
-              "rounded-lg px-3 py-2 text-[13px] leading-relaxed transition-colors",
-              activeLine === i ? "bg-accent-soft" : "bg-transparent",
+              "grid grid-cols-[4.5rem_1fr] gap-2 border-l-2 py-0.5 pl-2.5 text-[13.5px] leading-relaxed transition-colors",
+              activeLine === i ? "border-ink" : "border-transparent",
             )}
           >
             <span
               className={cn(
-                "mr-1.5 text-[11.5px] font-semibold tracking-wide uppercase",
-                line.speaker === podcast.lines[0].speaker ? "text-accent" : "text-example",
+                "label pt-1",
+                line.speaker === podcast.lines[0].speaker ? "text-ink" : "text-ink-3",
               )}
             >
               {line.speaker}
             </span>
-            <span className="text-ink">{line.text}</span>
+            <span className="font-serif text-ink">{line.text}</span>
           </li>
         ))}
       </ol>

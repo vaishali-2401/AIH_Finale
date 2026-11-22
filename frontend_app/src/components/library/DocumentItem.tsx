@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert, FileText, RotateCw, Trash2, TriangleAlert } from "lucide-react";
+import { RotateCw, Trash2, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { IconButton } from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
@@ -51,30 +51,26 @@ export default function DocumentItem({ doc, active, onOpen, onDelete, onRetry }:
         disabled={failed}
         aria-current={active ? "true" : undefined}
         className={cn(
-          "flex w-full items-start gap-2.5 rounded-lg py-2 pr-9 pl-2 text-left transition-colors",
-          active ? "bg-accent-soft" : "hover:bg-surface-2",
+          "relative flex w-full items-start border-b border-line py-3 pr-10 pl-4 text-left transition-colors",
+          active ? "bg-surface-2" : "hover:bg-surface-2",
           failed && "cursor-default",
         )}
       >
         <span
-          className={cn(
-            "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md",
-            active ? "bg-accent text-white dark:text-canvas" : "bg-surface-2 text-ink-2",
-            failed && "bg-danger-soft text-danger",
-          )}
-        >
-          {failed ? <CircleAlert className="size-4" /> : <FileText className="size-4" />}
-        </span>
+          aria-hidden
+          className={cn("absolute inset-y-2.5 left-0 w-0.5", active ? "bg-ink" : "bg-transparent")}
+        />
         <span className="min-w-0 flex-1">
           <span
             className={cn(
-              "line-clamp-2 text-[13px] leading-snug font-medium",
-              active ? "text-accent-ink" : "text-ink",
+              "line-clamp-2 font-serif text-[14.5px] leading-snug",
+              failed ? "text-ink-3 line-through decoration-ink-3" : "text-ink",
+              active && "font-semibold",
             )}
           >
             {documentName(doc)}
           </span>
-          <span className="mt-0.5 flex items-center gap-1 text-[11.5px] text-ink-3">
+          <span className="mt-1 flex items-center gap-1 font-mono text-[10.5px] text-ink-3">
             {processing ? (
               <>
                 <Spinner className="size-3" /> Indexing…
@@ -100,7 +96,7 @@ export default function DocumentItem({ doc, active, onOpen, onDelete, onRetry }:
 
       <div
         className={cn(
-          "absolute top-1.5 right-1.5 flex items-center gap-0.5",
+          "absolute top-2 right-2 flex items-center gap-0.5 bg-surface-2",
           !confirming && "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100",
         )}
       >
@@ -114,7 +110,7 @@ export default function DocumentItem({ doc, active, onOpen, onDelete, onRetry }:
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="h-7 rounded-md bg-danger px-2 text-[12px] font-medium text-white dark:text-canvas"
+            className="h-7 bg-danger px-2 text-[12px] font-medium text-white"
           >
             {deleting ? "Deleting…" : "Delete?"}
           </button>

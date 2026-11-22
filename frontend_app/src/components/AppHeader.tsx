@@ -26,28 +26,28 @@ export default function AppHeader({
   const { theme, toggle } = useTheme();
 
   return (
-    <header className="flex h-13 shrink-0 items-center gap-2 border-b border-line bg-surface px-3">
+    <header className="flex h-13 shrink-0 items-center gap-3 border-b border-ink bg-surface px-3 sm:px-4">
       <IconButton label="Toggle library" className="lg:hidden" onClick={onToggleLibrary}>
         <PanelLeft className="size-4.5" />
       </IconButton>
 
       <div className="flex min-w-0 items-center gap-2.5">
-        <Logo />
-        <span className="hidden text-[15px] font-semibold tracking-tight text-ink sm:inline">
+        <Mark />
+        <span className="font-serif text-[19px] leading-none tracking-tight text-ink">
           Connecting the Dots
         </span>
       </div>
 
       {title && (
-        <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
+        <div className="hidden min-w-0 flex-1 items-center justify-center border-l border-line pl-3 md:flex">
           <span className="truncate text-[13px] text-ink-2">{title}</span>
         </div>
       )}
 
       <div className="ml-auto flex items-center gap-1">
-        <StatusPill health={health} online={online} />
+        <Status health={health} online={online} />
         <IconButton label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={toggle}>
-          {theme === "dark" ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
+          {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </IconButton>
         <IconButton
           label="Toggle connections panel"
@@ -62,18 +62,19 @@ export default function AppHeader({
   );
 }
 
-function StatusPill({ health, online }: { health: Health | null; online: boolean | null }) {
+function Status({ health, online }: { health: Health | null; online: boolean | null }) {
   if (online === null) return null;
   const [label, detail, dot] = !online
     ? ["Offline", "Can't reach the backend server.", "bg-danger"]
     : health?.ai_enabled
-      ? ["AI on", `Using ${health.model}. Voices: ${health.tts === "gemini" ? "Gemini" : "browser"}.`, "bg-success"]
-      : ["Keyword mode", "No Gemini API key: keyword search and browser voices only.", "bg-warning"];
+      ? [
+          health.model ?? "Gemini",
+          `AI on. Voices: ${health.tts === "gemini" ? "Gemini" : "browser"}.`,
+          "bg-ink",
+        ]
+      : ["Keyword mode", "No Gemini API key: keyword search and browser voices only.", "border border-ink"];
   return (
-    <span
-      title={detail}
-      className="hidden items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[12px] text-ink-2 sm:inline-flex"
-    >
+    <span title={detail} className="mr-1 hidden items-center gap-1.5 font-mono text-[11px] text-ink-2 sm:inline-flex">
       <span className={cn("size-1.5 rounded-full", dot)} aria-hidden />
       {label}
       <span className="sr-only">: {detail}</span>
@@ -81,22 +82,14 @@ function StatusPill({ health, online }: { health: Health | null; online: boolean
   );
 }
 
-function Logo() {
+/** Three dots joined by a line: the "connecting the dots" idea, drawn plainly. */
+function Mark() {
   return (
-    <svg viewBox="0 0 32 32" className="size-7 shrink-0" aria-hidden>
-      <rect width="32" height="32" rx="8" className="fill-accent" />
-      <path
-        d="M10 21.5 16 10.5l6 11"
-        fill="none"
-        stroke="white"
-        strokeOpacity="0.55"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="10" cy="21.5" r="3" fill="white" />
-      <circle cx="16" cy="10.5" r="3" fill="white" />
-      <circle cx="22" cy="21.5" r="3" fill="white" />
+    <svg viewBox="0 0 28 16" className="h-4 w-7 shrink-0 text-ink" aria-hidden>
+      <path d="M3 12 L14 4 L25 12" fill="none" stroke="currentColor" strokeWidth="1.25" />
+      <circle cx="3" cy="12" r="2.5" fill="currentColor" />
+      <circle cx="14" cy="4" r="2.5" fill="currentColor" />
+      <circle cx="25" cy="12" r="2.5" fill="var(--canvas)" stroke="currentColor" strokeWidth="1.25" />
     </svg>
   );
 }

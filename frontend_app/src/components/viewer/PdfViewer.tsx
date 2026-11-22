@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, ScanSearch, Sparkles, X } from "lucide-react";
+import { ArrowRight, Minus, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs, type DocumentProps } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -216,17 +216,17 @@ export default function PdfViewer({ documentId, fileUrl, highlight, goToPage, on
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-line bg-surface px-3">
-        <div className="text-[13px] tabular-nums text-ink-2" aria-live="polite">
+        <div className="font-mono text-[11px] text-ink-2" aria-live="polite">
           {numPages ? (
             <>
-              Page <span className="font-medium text-ink">{currentPage}</span> of {numPages}
+              Page <span className="text-ink">{currentPage}</span> of {numPages}
             </>
           ) : (
             "Loading…"
           )}
         </div>
-        <div className="hidden items-center gap-1.5 text-[12px] text-ink-3 md:flex">
-          <ScanSearch className="size-3.5" /> Select text to find connections
+        <div className="hidden font-serif text-[13px] text-ink-3 italic md:block">
+          Select text to find connections
         </div>
         <div className="flex items-center gap-0.5">
           <IconButton label="Zoom out" size="sm" onClick={() => zoomBy(-1)} disabled={zoom <= ZOOM_STEPS[0]}>
@@ -235,7 +235,7 @@ export default function PdfViewer({ documentId, fileUrl, highlight, goToPage, on
           <button
             type="button"
             onClick={() => setZoom(1)}
-            className="w-12 rounded-md py-1 text-center text-[12px] tabular-nums text-ink-2 hover:bg-surface-2"
+            className="w-12 py-1 text-center font-mono text-[11px] text-ink-2 hover:underline"
             title="Reset zoom (fit width)"
           >
             {Math.round(zoom * 100)}%
@@ -270,7 +270,7 @@ export default function PdfViewer({ documentId, fileUrl, highlight, goToPage, on
             </div>
           }
           error={
-            <div className="mx-auto mt-16 max-w-sm rounded-lg bg-surface p-5 text-center text-sm text-ink-2 shadow-sm">
+            <div className="mx-auto mt-16 max-w-sm border border-ink bg-surface p-5 text-center text-sm text-ink-2">
               <p className="font-medium text-ink">This PDF could not be displayed.</p>
               {loadError && <p className="mt-1 text-[13px]">{loadError}</p>}
             </div>
@@ -291,7 +291,7 @@ export default function PdfViewer({ documentId, fileUrl, highlight, goToPage, on
                   pageRefs.current[i] = el;
                 }}
                 data-page-number={page}
-                className="relative bg-white shadow-[0_1px_3px_rgb(0_0_0/0.12),0_4px_16px_rgb(0_0_0/0.06)]"
+                className="relative bg-white outline outline-1 outline-black/15"
                 style={{ width: pageWidth, height, marginBottom: PAGE_GAP }}
               >
                 {visible.has(page) && (
@@ -324,12 +324,12 @@ export default function PdfViewer({ documentId, fileUrl, highlight, goToPage, on
 
         {pending && (
           <div
-            className="absolute z-10 flex -translate-x-1/2 animate-fade-in items-center gap-1 rounded-lg border border-line bg-surface p-1 shadow-lg"
+            className="absolute z-10 flex -translate-x-1/2 animate-fade-in items-center gap-1 border border-ink bg-surface p-1 shadow-lg"
             style={{ top: Math.max(pending.top, 4), left: pending.left }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <Button size="sm" variant="primary" icon={<Sparkles className="size-3.5" />} onClick={analyzePending}>
-              Find connections
+            <Button size="sm" variant="primary" onClick={analyzePending}>
+              Find connections <ArrowRight className="size-3.5" />
             </Button>
             <IconButton label="Dismiss" size="sm" onClick={() => setPending(null)}>
               <X className="size-3.5" />

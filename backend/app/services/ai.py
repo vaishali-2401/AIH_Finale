@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 T = TypeVar("T", bound=BaseModel)
 
 EMBED_BATCH = 100
-EMBED_RETRY_DELAYS = [5, 10, 20]
+EMBED_RETRY_DELAYS = [10, 30, 60]  # free-tier limits reset per minute
 TTS_SAMPLE_RATE = 24_000
 COOLDOWN_SECONDS = 300
 # Status codes worth trying another model for: rate limited, server errors, timeouts.

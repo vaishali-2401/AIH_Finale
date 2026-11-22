@@ -251,21 +251,28 @@ def _build_chunks(blocks: list[Block], levels: dict[int, str]) -> list[NewChunk]
 
 def _make_chunks(blocks: list[Block], section: str | None) -> list[NewChunk]:
     text = " ".join(b.text for b in blocks)
-    rects = [b.rect for b in blocks]
     words = text.split()
     if len(words) <= TARGET_WORDS * 2:
+        # Record which characters of the chunk text each rectangle covers, so a
+        # connection can highlight just the matching part of a long chunk.
+        rects, pos = [], 0
+        for b in blocks:
+            rects.append({**b.rect, "start": pos, "end": pos + len(b.text)})
+            pos += len(b.text) + 1
         return [NewChunk(section=section, text=text, page=blocks[0].page, rects=rects)]
     # A single enormous block (e.g. text extracted without paragraph breaks):
     # split on sentence boundaries; every piece shares the block rectangles.
+    # Offsets are unknown (-1), so the whole area is highlighted.
+    shared = [{**b.rect, "start": -1, "end": -1} for b in blocks]
     pieces: list[NewChunk] = []
     current: list[str] = []
     for sentence in re.split(r"(?<=[.!?])\s+", text):
         current.append(sentence)
         if sum(len(s.split()) for s in current) >= TARGET_WORDS:
-            pieces.append(NewChunk(section, " ".join(current), blocks[0].page, rects))
+            pieces.append(NewChunk(section, " ".join(current), blocks[0].page, [dict(r) for r in shared]))
             current = []
     if current:
-        pieces.append(NewChunk(section, " ".join(current), blocks[0].page, rects))
+        pieces.append(NewChunk(section, " ".join(current), blocks[0].page, [dict(r) for r in shared]))
     return pieces
 
 
@@ -275,8 +282,12 @@ def _merge_small(chunks: list[NewChunk]) -> list[NewChunk]:
     for chunk in chunks:
         prev = merged[-1] if merged else None
         if prev and prev.section == chunk.section and len(chunk.text.split()) < MIN_WORDS:
+            shift = len(prev.text) + 1
             prev.text = f"{prev.text} {chunk.text}"
-            prev.rects.extend(chunk.rects)
+            prev.rects.extend(
+                {**r, "start": r["start"] + shift, "end": r["end"] + shift} if r["start"] >= 0 else r
+                for r in chunk.rects
+            )
         else:
             merged.append(chunk)
     return merged

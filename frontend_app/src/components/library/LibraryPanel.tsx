@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, FilePlus2, Library, ListTree, Search } from "lucide-react";
+import { BookOpen, FilePlus2, Library, Search } from "lucide-react";
 import { useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
@@ -40,7 +40,7 @@ export default function LibraryPanel(props: LibraryPanelProps) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="space-y-3 border-b border-line p-3">
+      <div className="space-y-4 px-4 pt-4">
         <Button
           variant="primary"
           className="w-full"
@@ -67,8 +67,8 @@ export default function LibraryPanel(props: LibraryPanelProps) {
           value={tab}
           onChange={setTab}
           tabs={[
-            { id: "library", label: "Library", icon: <Library className="size-3.5" /> },
-            { id: "outline", label: "Outline", icon: <ListTree className="size-3.5" /> },
+            { id: "library", label: "Library" },
+            { id: "outline", label: "Outline" },
           ]}
         />
       </div>
@@ -82,23 +82,23 @@ export default function LibraryPanel(props: LibraryPanelProps) {
         {tab === "library" ? (
           <>
             {documents.length > 4 && (
-              <div className="relative px-3 pt-3">
-                <Search className="pointer-events-none absolute top-1/2 left-5.5 mt-1.5 size-3.5 -translate-y-1/2 text-ink-3" />
+              <div className="relative px-4 pt-3 pb-1">
+                <Search className="pointer-events-none absolute top-1/2 left-4 mt-1 size-3.5 -translate-y-1/2 text-ink-3" />
                 <input
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Filter documents"
                   aria-label="Filter documents"
-                  className="h-8 w-full rounded-md border border-line bg-surface pr-2 pl-8 text-[13px] text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
+                  className="h-8 w-full border-0 border-b border-line bg-transparent pr-2 pl-6 text-[13px] text-ink placeholder:text-ink-3 focus:border-ink focus:outline-none"
                 />
               </div>
             )}
             {loading ? (
               <div className="space-y-3 p-3">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="flex gap-3 p-1">
-                    <Skeleton className="size-8 shrink-0" />
+                  <div key={i} className="flex gap-3 border-b border-line py-3 pl-1">
+                    
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-3 w-4/5" />
                       <Skeleton className="h-2.5 w-1/2" />
@@ -115,7 +115,7 @@ export default function LibraryPanel(props: LibraryPanelProps) {
                 Add a few related PDFs (or drop them anywhere on the page) to start connecting ideas.
               </EmptyState>
             ) : (
-              <ul className="space-y-0.5 p-2">
+              <ul className="border-t border-line">
                 {filtered.map((doc) => (
                   <DocumentItem
                     key={doc.id}

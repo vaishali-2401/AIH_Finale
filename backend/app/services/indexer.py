@@ -46,21 +46,20 @@ class Indexer:
         self._run(lambda: self._process(doc_id))
 
     def resume_pending(self) -> None:
-        """Called on startup: finish interrupted jobs and, when AI is now
-        available, upgrade keyword-only documents to semantic search."""
+        """Called on startup: finish interrupted jobs, upgrade keyword-only
+        documents to semantic search when AI is now available, and re-index
+        documents built by an older version of the pipeline."""
         for doc in self._db.list_documents():
-            needs_embeddings = (
-                self._ai is not None and doc.status == "ready" and doc.search_mode != "semantic"
-            )
+            first = next(iter(self._db.chunks_for_document(doc.id)), None) if doc.status == "ready" else None
+            needs_embeddings = self._ai is not None and first is not None and doc.search_mode != "semantic"
             stale_model = (
                 self._ai is not None
-                and doc.status == "ready"
-                and any(
-                    c.embedding_model != self._ai.embedding_model
-                    for c in self._db.chunks_for_document(doc.id)[:1]
-                )
+                and first is not None
+                and first.embedding_model != self._ai.embedding_model
             )
-            if doc.status == "processing" or needs_embeddings or stale_model:
+            # Rectangles without character offsets predate focused highlights.
+            old_format = first is not None and bool(first.rects) and "start" not in first.rects[0]
+            if doc.status == "processing" or needs_embeddings or stale_model or old_format:
                 log.info("Re-indexing %s (%s)", doc.filename, doc.id)
                 self.schedule(doc.id)
 
