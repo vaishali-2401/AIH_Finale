@@ -42,7 +42,8 @@ function WorkspaceInner() {
   const analysis = useAnalysis();
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [outline, setOutline] = useState<OutlineItem[] | null>(null);
+  // Keyed by document id, so a stale outline is never shown for another document.
+  const [outline, setOutline] = useState<{ documentId: string; items: OutlineItem[] } | null>(null);
   const [highlight, setHighlight] = useState<HighlightTarget | null>(null);
   const [goToPage, setGoToPage] = useState<{ page: number; nonce: number } | null>(null);
   const [activeChunkId, setActiveChunkId] = useState<string | null>(null);
@@ -57,7 +58,6 @@ function WorkspaceInner() {
 
   const openDocument = useCallback((id: string) => {
     setActiveId(id);
-    setOutline(null);
     setGoToPage(null);
     setLibraryOpen(false);
   }, []);
@@ -68,8 +68,8 @@ function WorkspaceInner() {
     let cancelled = false;
     api
       .getDocument(activeId)
-      .then((detail) => !cancelled && setOutline(detail.outline))
-      .catch(() => !cancelled && setOutline([]));
+      .then((detail) => !cancelled && setOutline({ documentId: activeId, items: detail.outline }))
+      .catch(() => !cancelled && setOutline({ documentId: activeId, items: [] }));
     return () => {
       cancelled = true;
     };
@@ -243,7 +243,13 @@ function WorkspaceInner() {
             error={library.error}
             uploading={library.uploading}
             activeId={activeId}
-            outline={activeDoc?.status === "failed" ? [] : activeDoc?.status === "ready" ? outline : null}
+            outline={
+              activeDoc?.status === "failed"
+                ? []
+                : outline?.documentId === activeId
+                  ? outline.items
+                  : null /* loading or still indexing */
+            }
             onUpload={handleUpload}
             onOpen={openDocument}
             onDelete={handleDelete}

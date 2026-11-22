@@ -20,6 +20,8 @@ Other scripts:
 | `npm run build` | Static export to `out/`. The backend serves it when `FRONTEND_DIST` points there |
 | `npm run lint` | ESLint (Next.js core-web-vitals + TypeScript rules) |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest unit tests (`src/**/*.test.ts`) |
+| `npm run test:e2e` | Playwright end-to-end tests against the real backend. Run `npm run build` first. Set `PW_CHANNEL=chrome` to use installed Chrome |
 
 `predev` and `prebuild` copy the PDF.js worker, character maps and standard
 fonts from the exact `pdfjs-dist` version react-pdf uses into `public/pdfjs/`

@@ -32,3 +32,8 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Playwright
+/frontend_app/.e2e-data/
+/frontend_app/test-results/
+/frontend_app/playwright-report/

@@ -1,366 +1,253 @@
-# 🔬 Adobe India Hackathon 2025 - PDF Intelligence Engine
+# Connecting the Dots
 
-**Connecting the Dots Challenge: From Brains to Experience - Make It Real**
+Read your PDFs and see how the ideas in them connect. Select a passage in any
+document, and the app finds where the rest of your library **supports**,
+**contradicts**, **gives an example of**, or **relates to** it. One click jumps
+to the exact passage in the source document, highlighted. You can also generate
+insights on a passage or listen to a short two-host podcast about it.
 
-A revolutionary PDF analysis application that transforms static documents into intelligent, interactive experiences using cutting-edge AI and machine learning technologies.
+![Connections panel next to the PDF viewer, with the matching passage highlighted](docs/screenshots/connections.png)
 
-## 🚀 Project Overview
+Originally built for the *Connecting the Dots* challenge of the Adobe India
+Hackathon 2025, then rebuilt (v2) to be reliable, simpler to run and easier to
+maintain. See [What changed in v2](#what-changed-in-v2).
 
-Our solution creates an intelligent PDF reading experience that goes beyond traditional document viewers. By combining advanced OCR, vector embeddings, and AI-powered insights, we enable users to discover hidden connections, validate information, and gain deeper understanding from their documents.
+---
 
-## 🎯 Core Features
+## Contents
 
-### 📄 **Smart PDF Analysis**
+- [Features](#features)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [How it works](#how-it-works)
+- [API](#api)
+- [Project structure](#project-structure)
+- [Development and testing](#development-and-testing)
+- [Troubleshooting](#troubleshooting)
+- [What changed in v2](#what-changed-in-v2)
 
-- **Adobe PDF Embed API Integration**: Seamless PDF rendering with 100% fidelity
-- **Intelligent Text Selection**: Advanced text selection capabilities with contextual understanding
-- **Real-time Processing**: Fast response times under 2 seconds for recommendations
+## Features
 
-### 🔍 **Advanced Document Intelligence**
+| | |
+|---|---|
+| **Library** | Upload up to 30 PDFs at once (or drag them anywhere onto the page). Documents are indexed in the background. Duplicates are detected by content. Failed documents can be retried. |
+| **Reader** | PDF.js viewer with real text selection, zoom, and an outline of detected sections. |
+| **Connections** | Select text → *Find connections*. Each result says how it relates and why, and clicking it opens the source page with the passage highlighted. |
+| **Insights** | Summary, key takeaways, contradictions, examples and "did you know" facts, grounded only in your documents. |
+| **Podcast** | A short two-host episode about the passage. It's voiced by Gemini when available, and otherwise read aloud by the browser. |
+| **Works without AI** | With no API key the app still runs: keyword-based connections, a scripted podcast and browser voices. |
+| **Polish** | Light/dark theme, responsive layout (drawers on small screens), keyboard-accessible tabs, clear loading, empty and error states. |
 
-- **OCR Text Extraction**: High-accuracy text extraction from selected PDF regions
-- **Vector Embeddings**: Semantic understanding using state-of-the-art embedding models
-- **ChromaDB Integration**: Efficient vector storage and similarity search
-- **MongoDB Storage**: Robust document and metadata management
+<table>
+  <tr>
+    <td><img src="docs/screenshots/podcast.png" alt="Podcast tab with transcript"></td>
+    <td><img src="docs/screenshots/dark-mode.png" alt="Dark theme"></td>
+  </tr>
+</table>
 
-### 💡 **AI-Powered Insights**
+## Quick start
 
-- **Contextual Recommendations**: Find related content across documents with >80% accuracy
-- **Contradiction Detection**: Identify conflicting information across your document library
-- **Knowledge Validation**: Cross-reference facts and validate information
-- **Smart Connections**: Discover hidden relationships between different sections
-
-### 🎧 **Audio Generation (Bonus)**
-
-- **Text-to-Speech Integration**: Generate narrated overviews using Azure TTS
-- **Podcast Mode**: Create 2-5 minute audio summaries of key insights
-- **Multi-language Support**: Compatible with various TTS providers
-
-## 🏗️ Technical Architecture
-
-### **Our Innovative Approach**
-
-```mermaid
-graph TD
-    A[PDF Upload] --> B[Adobe PDF Embed API]
-    B --> C[Text Selection]
-    C --> D[Screenshot Capture]
-    D --> E[OCR Text Extraction]
-    E --> F[Round 1A Logic Processing]
-    F --> G[Vector Embedding Generation]
-    G --> H[ChromaDB Chunking & Storage]
-    H --> I[MongoDB Metadata Storage]
-    I --> J[Semantic Search]
-    J --> K[AI-Powered Filtering]
-    K --> L[3 Recommendation Cards]
-    L --> M[Gemini 2.5 Flash Insights]
-    M --> N[Contradiction/Validation Analysis]
-```
-
-### **Technology Stack**
-
-#### **Frontend**
-
-- **Next.js 14**: Modern React framework with App Router
-- **TypeScript**: Type-safe development
-- **Adobe PDF Embed API**: Professional PDF rendering
-- **Tailwind CSS**: Responsive, modern UI design
-- **HTML2Canvas**: Screenshot capture capabilities
-
-#### **Backend**
-
-- **FastAPI**: High-performance Python web framework
-- **Google Gemini 2.5 Flash**: Advanced language model for text processing and insights
-- **ChromaDB**: Vector database for semantic search
-- **MongoDB**: Document and metadata storage
-- **PyMuPDF**: PDF processing and text extraction
-- **Motor**: Async MongoDB driver
-
-#### **AI & Machine Learning**
-
-- **Google Generative AI**: Text and vision model integration
-- **Sentence Transformers**: High-quality text embeddings
-- **Vector Similarity Search**: Semantic content matching
-- **LLM-based Filtering**: Intelligent result validation
-
-## 🔧 Installation & Setup
-
-### **Prerequisites**
-
-- Docker & Docker Compose
-- Google Cloud API credentials (for Gemini API)
-- Azure TTS credentials (optional, for audio features)
-
-### **Quick Start with Docker**
-
-1. **Clone the Repository**
+### Option A: Docker (one command)
 
 ```bash
-git clone <your-repo-url>
-cd final
+docker compose up --build
 ```
 
-2. **Set Up Environment Variables**
+Open <http://localhost:8080>. To enable the AI features, create a `.env` file
+next to `docker-compose.yml` containing `GEMINI_API_KEY=your-key` (get one at
+[Google AI Studio](https://aistudio.google.com/apikey)) and run the command
+again. Data is kept in the `ctd-data` Docker volume.
+
+Without Compose:
 
 ```bash
-# Copy the example environment file
-cp env.example .env
-
-# Edit .env file with your actual values:
-# - NEXT_PUBLIC_ADOBE_CLIENT_ID: Your Adobe PDF Embed API client ID
-# - GOOGLE_API_KEY: Your Google AI API key
-# - AZURE_TTS_KEY & AZURE_TTS_ENDPOINT: For audio features (optional)
+docker build -t connecting-the-dots .
+docker run -p 8080:8080 -v ctd-data:/data -e GEMINI_API_KEY=your-key connecting-the-dots
 ```
 
-**Required Environment Variables:**
+### Option B: Local development
+
+Requirements: **Python 3.12+** (tested on 3.14) and **Node.js 22.13+**.
 
 ```bash
-# Frontend Configuration
-NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8000
-NEXT_PUBLIC_ADOBE_CLIENT_ID=your_adobe_client_id_here
-
-# Backend Configuration
-MONGODB_URI=mongodb://localhost:27017
-DB_NAME=mydb
-GOOGLE_API_KEY=your_google_api_key
-CHROMA_DB_PATH=./chromadb
-COLLECTION_NAME=document_chunks
-```
-
-3. **Build and Run with Docker**
-
-```bash
-# Build the Docker image
-docker build --platform linux/amd64 -t pdf-intelligence-engine .
-
-# Run the application with all required environment variables
-docker run \
-  -e LLM_PROVIDER=gemini \
-  -e GOOGLE_API_KEY=your_google_api_key \
-  -e GEMINI_MODEL=gemini-2.5-flash \
-  -e TTS_PROVIDER=azure \
-  -e AZURE_TTS_KEY=your_tts_key \
-  -e AZURE_TTS_ENDPOINT=your_tts_endpoint \
-  -e NEXT_PUBLIC_ADOBE_CLIENT_ID=your_adobe_client_id \
-  -e MONGODB_URI=mongodb://localhost:27017 \
-  -e DB_NAME=mydb \
-  -e CHROMA_DB_PATH=/app/chromadb \
-  -e COLLECTION_NAME=document_chunks \
-  -p 8080:8080 \
-  pdf-intelligence-engine
-```
-
-4. **Access the Application**
-
-- **Application**: `http://localhost:8080` (Frontend + Backend unified)
-- **API Documentation**: `http://localhost:8080/docs`
-
-**Note:** When running in Docker, the application serves both frontend and backend on port 8080 as required by the hackathon specifications. The frontend is built and served statically through the backend.
-
-### **Development Setup (Without Docker)**
-
-#### **Backend Setup**
-
-```bash
+# 1. Backend (http://127.0.0.1:8000, API docs at /docs)
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
-```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+cp .env.example .env            # optional: add GEMINI_API_KEY
+.venv/bin/python -m app
 
-#### **Frontend Setup**
-
-```bash
+# 2. Frontend (http://localhost:3000), in a second terminal
 cd frontend_app
 npm install
 npm run dev
 ```
 
-## 🎯 How It Works
+## Configuration
 
-### **1. PDF Processing Pipeline**
+All settings are environment variables (or `backend/.env`). All of them are optional.
 
-1. **Upload & Render**: Users upload PDFs, which are rendered using Adobe's PDF Embed API
-2. **Text Selection**: Users select relevant text sections from the PDF
-3. **Screenshot Capture**: The application captures the selected region for context
-4. **OCR Extraction**: Advanced OCR extracts text with high accuracy
+| Variable | Default | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | *(empty)* | Enables semantic search, AI ranking, insights and the AI-written podcast. `GOOGLE_API_KEY` is accepted too. |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Model for ranking, insights and podcast scripts. |
+| `EMBEDDING_MODEL` | `gemini-embedding-001` | Embedding model. Changing it re-indexes documents on the next start. |
+| `TTS_ENABLED` | `true` | Set `false` to always use browser speech. |
+| `TTS_API_KEY` | *(uses `GEMINI_API_KEY`)* | Separate key for Gemini text-to-speech. |
+| `TTS_MODEL` | `gemini-2.5-flash-preview-tts` | Multi-speaker TTS model. |
+| `DATA_DIR` | `backend/data` (`/data` in Docker) | SQLite database, uploaded PDFs, generated audio. |
+| `HOST` / `PORT` | `127.0.0.1` / `8000` (`0.0.0.0` / `8080` in Docker) | Server address. |
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins allowed to call the API. |
+| `FRONTEND_DIST` | *(empty)* | Folder of the exported frontend to serve at `/` (set in Docker). |
+| `NEXT_PUBLIC_API_URL` | `http://127.0.0.1:8000` in dev, empty in production | Frontend → API base URL (`frontend_app/.env.development`). |
 
-### **2. Intelligence Layer**
+### What works with and without a key
 
-1. **Round 1A Logic**: Applies pre-trained document understanding models
-2. **Vector Embedding**: Converts text to high-dimensional semantic vectors
-3. **ChromaDB Storage**: Efficiently stores and indexes vector embeddings
-4. **Metadata Management**: MongoDB stores document metadata and relationships
+| | No key | With `GEMINI_API_KEY` |
+|---|---|---|
+| Upload, read, outline | ✅ | ✅ |
+| Connections | Keyword (TF-IDF) matches | Semantic search + Gemini labels each match and explains why |
+| Insights | Explains that a key is needed | ✅ |
+| Podcast | Scripted walkthrough, browser voice | Gemini-written dialogue, Gemini voices (falls back to the browser if TTS fails) |
 
-### **3. Smart Recommendations**
+If a Gemini call fails (invalid key, quota, network), the feature falls back to
+the keyword or browser path and the UI says why. Nothing crashes.
 
-1. **Semantic Search**: Finds related content using vector similarity
-2. **AI Filtering**: Gemini 2.5 Flash validates and ranks results
-3. **Context Understanding**: Analyzes relationships between document sections
-4. **User Interface**: Presents exactly 3 relevant recommendation cards
+## How it works
 
-### **4. Advanced Insights**
-
-1. **Cross-Document Analysis**: Identifies patterns across multiple documents
-2. **Contradiction Detection**: Flags conflicting information
-3. **Knowledge Validation**: Verifies facts and claims
-4. **Insight Generation**: Creates "Did you know?" style discoveries
-
-## 📊 Performance Metrics
-
-- **Response Time**: < 2 seconds for recommendations
-- **Accuracy**: > 80% relevance for document recommendations
-- **Scalability**: Handles multiple concurrent users
-- **Storage Efficiency**: Optimized vector storage and retrieval
-
-## 🎨 User Experience
-
-### **Intuitive Interface**
-
-- Clean, modern design following best UX practices
-- Responsive layout that works on all devices
-- Fast, predictable interactions
-- Clear visual feedback for all operations
-
-### **Smart Features**
-
-- **One-click Navigation**: Jump to related sections instantly
-- **Contextual Highlights**: Visual indicators for relevant content
-- **Progressive Disclosure**: Information revealed as needed
-- **Accessibility**: Full keyboard navigation and screen reader support
-
-## 🔮 Advanced Features
-
-### **Insights Engine**
-
-- **Contradiction Analysis**: "This statement conflicts with page X"
-- **Validation Support**: "This claim is supported by 3 other sources"
-- **Knowledge Discovery**: "Did you know this relates to..."
-- **Cross-Reference**: "Similar concepts appear in documents Y and Z"
-
-### **Audio Generation**
-
-- **Dynamic Narration**: AI-generated audio summaries
-- **Podcast Creation**: 2-5 minute document overviews
-- **Multi-language**: Support for various languages and accents
-- **Custom Voice**: Consistent narration experience
-
-## 🏆 Competitive Advantages
-
-1. **Real-time Processing**: Instant recommendations without long waits
-2. **High Accuracy**: >80% relevance through advanced AI filtering
-3. **Scalable Architecture**: Cloud-native design for enterprise use
-4. **Extensible Platform**: Easy integration with existing document workflows
-5. **User-Centric Design**: Intuitive interface that enhances productivity
-
-## 🔧 Configuration
-
-### **Environment Variables**
-
-```bash
-# Required
-LLM_PROVIDER=gemini
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
-GEMINI_MODEL=gemini-2.5-flash
-
-# Optional (for audio features)
-TTS_PROVIDER=azure
-AZURE_TTS_KEY=your_key
-AZURE_TTS_ENDPOINT=your_endpoint
-
-# Database
-MONGODB_URL=mongodb://localhost:27017
-CHROMADB_PATH=./chromadb
+```mermaid
+flowchart LR
+    subgraph Browser["Browser (Next.js + PDF.js)"]
+        V["PDF viewer"] -- selected text --> P["Connections panel"]
+    end
+    subgraph API["FastAPI backend"]
+        U["Upload"] --> X["Parse with PyMuPDF<br/>headings · sections · rects"]
+        X --> E["Embed chunks<br/>gemini-embedding-001"]
+        E --> DB[("SQLite<br/>documents · chunks · vectors")]
+        X --> DB
+        Q["POST /api/connections"] --> S["Vector or keyword search<br/>top 20 candidates"]
+        S --> R["One Gemini call:<br/>rank, label, explain"]
+    end
+    P -- POST --> Q
+    R -- connections + highlight rects --> P
+    DB --> S
 ```
 
-### **API Configuration**
+1. **Indexing.** Each uploaded PDF is stored under its content hash. PyMuPDF
+   reads the text with font information. Headings are detected from size and
+   weight (or taken from the PDF's own bookmarks). The text is split into
+   section-aware chunks of about 220 words, each with the rectangles of its
+   text blocks as fractions of the page size. Chunks are embedded with Gemini
+   when a key is available.
+2. **Connections.** The selected text is matched against every chunk in the
+   library: cosine similarity over embeddings, or TF-IDF without a key. The
+   chunk the selection came from is excluded. The top candidates go to Gemini
+   in one structured-output call, which returns a relation, a relevance score
+   and a one-sentence reason for each passage worth showing.
+3. **Highlights.** The frontend draws each chunk's stored rectangles over the
+   rendered page. Because they are page fractions, they line up at any zoom.
+4. **Insights and podcast.** These are stateless requests that carry the
+   selection and the IDs of the connected chunks. The podcast script comes
+   back as structured lines. When Gemini TTS is available it is voiced as a
+   WAV; otherwise the browser's `speechSynthesis` reads it with two voices.
 
-The application automatically adapts to different LLM providers:
+## API
 
-- **Gemini**: Primary recommendation (optimal performance)
-- **Azure OpenAI**: Enterprise compatibility
-- **OpenAI**: Direct API integration
-- **Local Models**: For privacy-sensitive deployments
+Interactive documentation is served at **`/docs`** (Swagger UI) when the backend runs.
 
-## 🚀 Deployment
+| Method & path | Purpose |
+|---|---|
+| `GET /api/health` | Status, whether AI is enabled, TTS mode, document count |
+| `GET /api/documents` | List documents with their indexing status |
+| `POST /api/documents` | Upload PDFs (`multipart/form-data`, field `files`) |
+| `GET /api/documents/{id}` | Document details and outline |
+| `GET /api/documents/{id}/file` | The PDF itself |
+| `DELETE /api/documents/{id}` | Delete a document and its index |
+| `POST /api/documents/{id}/reindex` | Process a document again |
+| `POST /api/connections` | `{text, document_id?, page?}` → related passages |
+| `POST /api/insights` | `{text, chunk_ids}` → structured insights (needs a key) |
+| `POST /api/podcast` | `{text, chunk_ids, insights?}` → script, plus an audio URL when Gemini TTS is available |
+| `GET /api/podcast/audio/{id}` | Generated podcast audio (WAV) |
 
-### **Production Deployment**
+## Project structure
 
-```bash
-# Build for production
-docker build --platform linux/amd64 -t pdf-intelligence-engine .
-
-# Deploy with environment variables
-docker run \
-  -e LLM_PROVIDER=gemini \
-  -e GOOGLE_API_KEY=${GOOGLE_API_KEY} \
-  -e GEMINI_MODEL=gemini-2.5-flash \
-  -e TTS_PROVIDER=azure \
-  -e AZURE_TTS_KEY=${AZURE_TTS_KEY} \
-  -e AZURE_TTS_ENDPOINT=${AZURE_TTS_ENDPOINT} \
-  -e NEXT_PUBLIC_ADOBE_CLIENT_ID=${NEXT_PUBLIC_ADOBE_CLIENT_ID} \
-  -e MONGODB_URI=${MONGODB_URI} \
-  -e DB_NAME=${DB_NAME} \
-  -e CHROMA_DB_PATH=/app/chromadb \
-  -e COLLECTION_NAME=document_chunks \
-  -p 8080:8080 \
-  pdf-intelligence-engine
+```
+.
+├── backend/                 FastAPI service. See backend/README.md
+│   ├── app/
+│   │   ├── api/             HTTP routes
+│   │   ├── services/        pdf_processing, indexer, search, analysis, ai (Gemini)
+│   │   ├── config.py        settings
+│   │   ├── db.py            SQLite storage
+│   │   └── schemas.py       request/response models
+│   └── tests/               pytest (generated PDFs, fake Gemini, no network)
+├── frontend_app/            Next.js app. See frontend_app/README.md
+│   ├── src/components/      workspace, library, viewer, analysis, ui
+│   ├── src/hooks/ src/lib/  data hooks, API client, types, browser speech
+│   └── e2e/                 Playwright end-to-end tests + fixture PDFs
+├── Dockerfile               multi-stage: builds the frontend, serves everything on :8080
+├── docker-compose.yml
+└── .github/workflows/ci.yml lint, tests, build, e2e and Docker smoke test
 ```
 
-### **Scaling Considerations**
+## Development and testing
 
-- **Horizontal Scaling**: Multiple backend instances behind load balancer
-- **Database Optimization**: MongoDB sharding for large document collections
-- **Vector Search**: ChromaDB clustering for improved performance
-- **CDN Integration**: Faster PDF delivery through content distribution
+| | Command | Where |
+|---|---|---|
+| Backend tests | `.venv/bin/python -m pytest` | `backend/` |
+| Backend lint/format | `.venv/bin/ruff check app tests && .venv/bin/ruff format --check app tests` | `backend/` |
+| Frontend lint / types | `npm run lint` · `npm run typecheck` | `frontend_app/` |
+| Frontend unit tests | `npm test` | `frontend_app/` |
+| End-to-end tests | `npm run build && npm run test:e2e` | `frontend_app/` |
 
-## 🧪 Testing
+The end-to-end tests start the real backend (no API key) serving the built
+frontend. They upload the fixture PDFs, select text, open a connection, check
+the highlight, generate a podcast and check the mobile layout. They use
+Playwright's Chromium (`npx playwright install chromium`). Set `PW_CHANNEL=chrome`
+to use an installed Chrome instead, and `E2E_PYTHON` if the backend's Python
+isn't at `backend/.venv/bin/python`.
 
-### **Functional Testing**
+CI runs all of the above on every push to `main` and on every pull request,
+and smoke-tests the Docker image.
 
-```bash
-# Backend tests
-cd backend
-python -m pytest tests/
+Two rules for contributors:
+- **Keep `frontend_app/src/lib/types.ts` in sync with `backend/app/schemas.py`.**
+- **Only `backend/app/services/ai.py` imports the Gemini SDK**, so the rest of
+  the backend stays testable without network access.
 
-# Frontend tests
-cd frontend_app
-npm run test
-```
+## Troubleshooting
 
-### **Performance Testing**
+| Symptom | Fix |
+|---|---|
+| Header shows **Offline** | The backend isn't running or isn't at `NEXT_PUBLIC_API_URL`. Start it with `python -m app` in `backend/`. |
+| Header shows **Keyword mode** although you set a key | Restart the backend after editing `.env`. Check that the variable is `GEMINI_API_KEY`. |
+| Documents show *Semantic indexing failed, keyword search only* | The key is invalid or out of quota. Fix the key and restart: keyword-only documents are re-indexed automatically. |
+| *PDF contains no extractable text* | The PDF is a scanned image. Run it through OCR first (e.g. `ocrmypdf`). |
+| Podcast plays with a robotic voice | That's the browser fallback. Gemini TTS is unavailable; the tab says why. |
+| `npm install` / `npm run dev` fails on PDF.js | Use Node.js 22.13 or newer. |
+| Port already in use | Set `PORT=...` for the backend, or change the left side of `8080:8080` in `docker-compose.yml`. |
 
-- Load testing with multiple concurrent users
-- Vector search performance benchmarks
-- API response time validation
-- Memory usage optimization
+## What changed in v2
 
-## 📈 Future Enhancements
+The hackathon version had stopped working. Its Gemini models were retired and
+its SDK deprecated, `python main.py` never started a server, and the Adobe
+viewer's cross-origin iframe made the screenshot-based pipeline send blank
+images. v2 is a rebuild:
 
-1. **Multi-modal Analysis**: Image and chart understanding
-2. **Real-time Collaboration**: Shared document insights
-3. **Advanced Analytics**: Usage patterns and document insights
-4. **Mobile Application**: Native iOS and Android apps
-5. **Enterprise Integration**: SSO, permissions, and audit trails
+- **Backend:** SQLite replaces MongoDB and ChromaDB. The current `google-genai`
+  SDK replaces the deprecated one. There is one structured ranking call per
+  search instead of up to 100 sequential LLM calls. Endpoints are stateless (no
+  shared result files), uploads are deduplicated and sanitised, and dependencies
+  are pinned. There's a full pytest suite.
+- **Frontend:** PDF.js replaces Adobe PDF Embed, with real text selection and
+  highlights. Connections open the correct document. The podcast actually plays.
+  The three-panel UI has light and dark themes and works on mobile.
+- **Operations:** a working multi-stage Docker image on one port, Compose, and
+  CI with unit, end-to-end and container tests.
+- **Security:** an API key that had been committed was removed (it is no
+  longer valid, but it remains in git history) and `.env` files are git-ignored.
 
-## 🤝 Contributing
+## License
 
-We welcome contributions! Please see our contributing guidelines for details on how to submit pull requests, report issues, and suggest improvements.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Adobe India Hackathon 2025 organizers
-- Google Cloud Platform for Gemini API access
-- Open source community for amazing libraries and tools
-- Azure for Text-to-Speech services
-
----
-
-**Built with ❤️ for Adobe India Hackathon 2025**
-
-_"From Brains to Experience - Making PDF Intelligence Real"_
+No license has been chosen yet. Add a `LICENSE` file before publishing or
+accepting outside contributions.
