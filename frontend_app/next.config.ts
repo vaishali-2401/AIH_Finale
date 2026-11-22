@@ -1,51 +1,15 @@
 import type { NextConfig } from "next";
 
+/**
+ * The app is a fully client-side single page, exported as static files
+ * (`npm run build` -> `out/`) so the FastAPI backend can serve it on the same
+ * port in production. In development, `next dev` serves it on :3000 and calls
+ * the API at NEXT_PUBLIC_API_URL (see .env.development).
+ */
 const nextConfig: NextConfig = {
-  // Enable standalone output for Docker
-  output: 'standalone',
-  
-  // Optimize for performance
-  experimental: {
-    optimizePackageImports: ['@google/generative-ai']
-  },
-  
-  // Compress images
-  images: {
-    formats: ['image/webp', 'image/avif'],
-  },
-  
-  // SWC minification is enabled by default in Next.js 15
-  
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Permissions-Policy",
-            value:
-              'clipboard-read=(self "https://acrobatservices.adobe.com"), clipboard-write=(self "https://acrobatservices.adobe.com")',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
+  output: "export",
+  reactStrictMode: true,
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

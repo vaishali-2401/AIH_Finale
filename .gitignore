@@ -21,6 +21,8 @@ node_modules/
 /frontend_app/.next/
 /frontend_app/out/
 /frontend_app/next-env.d.ts
+# PDF.js worker/cmaps copied from node_modules by scripts/copy-pdfjs-assets.mjs
+/frontend_app/public/pdfjs/
 *.tsbuildinfo
 npm-debug.log*
 

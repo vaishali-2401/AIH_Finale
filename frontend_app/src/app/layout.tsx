@@ -1,27 +1,28 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Script from "next/script";
-import "../styles/globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Connecting the Dots - Adobe Hackathon",
-  description: "An intelligent PDF reading experience.",
+  title: "Connecting the Dots",
+  description: "Read your PDFs and discover how ideas connect across your whole library.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f6f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#111113" },
+  ],
+};
+
+// Applies the saved (or OS) colour theme before first paint to avoid a flash.
+const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="light"}})()`;
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Adobe PDF Embed API Script */}
-        <Script src="https://acrobatservices.adobe.com/view-sdk/viewer.js" strategy="beforeInteractive" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
