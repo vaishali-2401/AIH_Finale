@@ -1,0 +1,21 @@
+# docker compose up --build   ->  http://localhost:8080
+#
+# Optional: put GEMINI_API_KEY=... in a .env file next to this one (git-ignored)
+# to enable AI ranking, insights and Gemini voices.
+services:
+  app:
+    build: .
+    image: connecting-the-dots
+    ports:
+      - "8080:8080"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      TTS_ENABLED: ${TTS_ENABLED:-true}
+      # Model choices default to the app's built-in list (with automatic
+      # fallback). To override, add e.g. GEMINI_MODEL: gemini-3.6-flash
+    volumes:
+      - ctd-data:/data
+    restart: unless-stopped
+
+volumes:
+  ctd-data:

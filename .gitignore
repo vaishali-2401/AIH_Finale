@@ -1,0 +1,39 @@
+# --- Secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.development
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Runtime data written by the backend (SQLite DB, uploaded PDFs, audio)
+/backend/data/
+
+# --- Node / Next.js ----------------------------------------------------------
+node_modules/
+/frontend_app/.next/
+/frontend_app/out/
+/frontend_app/next-env.d.ts
+# PDF.js worker/cmaps copied from node_modules by scripts/copy-pdfjs-assets.mjs
+/frontend_app/public/pdfjs/
+*.tsbuildinfo
+npm-debug.log*
+
+# --- OS / editors ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Playwright
+/frontend_app/.e2e-data/
+/frontend_app/test-results/
+/frontend_app/playwright-report/

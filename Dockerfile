@@ -1,78 +1,48 @@
-# PDF Intelligence Engine - Adobe India Hackathon 2025
-FROM python:3.11-slim
+# Connecting the Dots: single image serving the API and the web app on :8080.
+#
+#   docker build -t connecting-the-dots .
+#   docker run -p 8080:8080 -v ctd-data:/data -e GEMINI_API_KEY=... connecting-the-dots
+#
+# GEMINI_API_KEY is optional: without it the app runs in keyword mode with
+# browser voices.
 
-# Install system dependencies including Node.js
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    curl \
-    gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# --- Stage 1: build the static frontend --------------------------------------
+FROM node:22-alpine AS frontend
+WORKDIR /build
+COPY frontend_app/package.json frontend_app/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY frontend_app/ ./
+# Same-origin API in production: requests go to /api/...
+ENV NEXT_PUBLIC_API_URL="" NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
 
-# Set working directory
+# --- Stage 2: Python runtime -------------------------------------------------
+FROM python:3.14-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 
-# Copy and install Python dependencies
 COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-# Copy backend code
-COPY backend/ ./
+COPY backend/app ./app
+COPY --from=frontend /build/out ./frontend
 
-# Copy frontend code
-COPY frontend_app/ ./frontend/
+RUN useradd --create-home --uid 10001 app \
+    && mkdir -p /data && chown app:app /data
+USER app
 
-# Install frontend dependencies and build
-WORKDIR /app/frontend
-RUN npm install && npm run build
-
-# Go back to app directory
-WORKDIR /app
-
-# Create uploads directory
-RUN mkdir -p uploads
-
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-ENV NODE_ENV=production
-ENV DOCKER_ENV=1
-
-# Frontend environment variables
-ENV NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8080
-ENV NEXT_PUBLIC_ADOBE_CLIENT_ID=""
-
-# Backend environment variables  
-ENV MONGODB_URI=mongodb://localhost:27017
-ENV DB_NAME=mydb
-ENV HOST=127.0.0.1
-ENV PORT=8080
-ENV UPLOAD_DIR=/app/uploads
-ENV SECRET_KEY=your-secret-key-here
-ENV GOOGLE_API_KEY=""
-ENV CHROMA_DB_PATH=/app/chromadb
-ENV COLLECTION_NAME=document_chunks
-ENV LLM_PROVIDER=gemini
-ENV GEMINI_MODEL=gemini-2.5-flash
-
-# Expose port 8080 as required by hackathon
+ENV HOST=0.0.0.0 \
+    PORT=8080 \
+    DATA_DIR=/data \
+    FRONTEND_DIST=/app/frontend \
+    CORS_ORIGINS=""
+VOLUME ["/data"]
 EXPOSE 8080
 
-# Create entrypoint script for unified service
-RUN echo '#!/bin/bash\n\
-    echo "🚀 Starting PDF Intelligence Engine (Unified Service)..."\n\
-    \n\
-    # Start backend server on port 8080 (serves both API and frontend)\n\
-    echo "📚 Starting unified backend+frontend service on port 8080..."\n\
-    python main.py\n' > /app/entrypoint.sh
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD python -c "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=4); sys.exit(0)" || exit 1
 
-RUN chmod +x /app/entrypoint.sh
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/docs || exit 1
-
-# Command to run the application
-CMD ["/app/entrypoint.sh"]
+CMD ["python", "-m", "app"]

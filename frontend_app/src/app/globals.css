@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/* Dark mode follows the data-theme attribute set in layout.tsx
+   (from the saved preference, or the OS setting). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens: ink on paper.
+
+   Black and white, hairline rules instead of floating cards, square corners,
+   serif for reading, a Swiss sans for interface, mono for metadata. The only
+   colour is a highlighter yellow for marking passages (and red for errors).
+   Components only use these semantic names, never raw palette colours.
+   ------------------------------------------------------------------------ */
+:root {
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f4f2;
+  --surface-3: #e8e8e5;
+  --line: #e2e2df;
+  --line-strong: #111111;
+  --ink: #111111;
+  --ink-2: #4a4a48;
+  --ink-3: #8c8c88;
+  --accent: #111111; /* "accent" is simply ink: black buttons, black focus rings */
+  --accent-hover: #2e2e2c;
+  --accent-soft: #f1f1ee;
+  --accent-ink: #111111;
+  --on-accent: #ffffff;
+  --viewer: #ebebe8;
+  --highlight: rgb(255 214 0 / 0.42); /* highlighter yellow */
+  --highlight-ring: #111111;
+  --hard-shadow: 3px 3px 0 #111111;
+
+  --danger: #b42318;
+  --danger-soft: #fdf1f0;
+  --warning: #4a4a48;
+  --warning-soft: #f4f4f2;
+  --success: #111111;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --canvas: #111111;
+  --surface: #111111;
+  --surface-2: #1b1b1a;
+  --surface-3: #262625;
+  --line: #2a2a29;
+  --line-strong: #ededea;
+  --ink: #ededea;
+  --ink-2: #b0b0ac;
+  --ink-3: #7a7a76;
+  --accent: #ededea;
+  --accent-hover: #ffffff;
+  --accent-soft: #1f1f1e;
+  --accent-ink: #ffffff;
+  --on-accent: #111111;
+  --viewer: #050505;
+  --highlight: rgb(255 214 0 / 0.38);
+  --highlight-ring: #ededea;
+  --hard-shadow: 3px 3px 0 #ededea;
+
+  --danger: #f97066;
+  --danger-soft: #2a1513;
+  --warning: #b0b0ac;
+  --warning-soft: #1b1b1a;
+  --success: #ededea;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-accent: var(--on-accent);
+  --color-viewer: var(--viewer);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+
+  --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Iowan Old Style", "Charter", "Bitstream Charter", "Palatino Linotype", Palatino,
+    Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* Square corners everywhere; rounded-full is kept for status dots only. */
+  --radius-xs: 0px;
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 3px;
+
+  /* No soft drop shadows: crisp offset shadows for floating elements only. */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: var(--hard-shadow);
+  --shadow-xl: var(--hard-shadow);
+
+  --animate-fade-in: fade-in 120ms ease-out;
+  --animate-slide-up: fade-in 120ms ease-out;
+  --animate-flash: flash 1.4s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes flash {
+  0%, 35% { outline: 2px solid var(--highlight-ring); outline-offset: 2px; }
+  100% { outline: 2px solid transparent; outline-offset: 2px; }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "liga";
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Small-caps style label used for section headings and metadata. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* While a selection drag that started in the PDF is in progress, only PDF
+   text is selectable. Without this, dragging past the edge of a page (into
+   the gutter or the side panels) lets the browser extend the selection over
+   every following page, selecting thousands of characters by accident. */
+.pdf-scroll,
+body.pdf-selecting {
+  user-select: none;
+}
+.pdf-scroll .textLayer {
+  user-select: text;
+}
+
+/* Selected PDF text: a neutral ink wash (the PDF.js text layer is transparent). */
+.react-pdf__Page .textLayer ::selection {
+  background: rgb(17 17 17 / 0.22);
+}
+
+/* Thin, unobtrusive scrollbars inside panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
